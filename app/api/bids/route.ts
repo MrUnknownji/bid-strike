@@ -3,6 +3,55 @@ import connectDB from '@/lib/db/database';
 import Bid from '@/lib/db/Bid';
 import Auction from '@/lib/db/Auction';
 import { getTokenFromRequest } from '@/lib/middleware/auth';
+import { notifyOutbid } from '@/lib/services/notificationService';
+
+async function processAutoBids(auctionId: string, currentBidderId: string, newPrice: number, bidIncrement: number) {
+    const autoBids = await Bid.find({
+        auction: auctionId,
+        bidder: { $ne: currentBidderId },
+        maxAutoBidAmount: { $exists: true, $gt: newPrice },
+    }).sort('-maxAutoBidAmount');
+
+    if (autoBids.length === 0) return null;
+
+    const topAutoBid = autoBids[0];
+    const autoBidAmount = Math.min(
+        topAutoBid.maxAutoBidAmount as number,
+        newPrice + bidIncrement
+    );
+
+    if (autoBidAmount <= newPrice) return null;
+
+    await Bid.updateMany(
+        { auction: auctionId, isWinning: true },
+        { isWinning: false }
+    );
+
+    const newBid = await Bid.create({
+        auction: auctionId,
+        bidder: topAutoBid.bidder,
+        amount: autoBidAmount,
+        isAutoBid: true,
+        maxAutoBidAmount: topAutoBid.maxAutoBidAmount,
+        isWinning: true,
+    });
+
+    await Auction.findByIdAndUpdate(auctionId, {
+        currentPrice: autoBidAmount,
+        $inc: { totalBids: 1 },
+    });
+
+    try {
+        await notifyOutbid(
+            currentBidderId,
+            auctionId,
+            'Auction',
+            autoBidAmount
+        );
+    } catch { }
+
+    return newBid;
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,7 +62,7 @@ export async function POST(request: NextRequest) {
 
         await connectDB();
         const body = await request.json();
-        const { auctionId, amount } = body;
+        const { auctionId, amount, maxAutoBidAmount } = body;
 
         if (!auctionId || !amount) {
             return NextResponse.json(
@@ -50,6 +99,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (maxAutoBidAmount && maxAutoBidAmount < amount) {
+            return NextResponse.json(
+                { error: 'Max auto-bid must be greater than or equal to bid amount' },
+                { status: 400 }
+            );
+        }
+
+        const previousWinner = await Bid.findOne({ auction: auctionId, isWinning: true });
+        const previousBidderId = previousWinner?.bidder?.toString();
+
         await Bid.updateMany(
             { auction: auctionId, isWinning: true },
             { isWinning: false }
@@ -59,6 +118,8 @@ export async function POST(request: NextRequest) {
             auction: auctionId,
             bidder: payload.userId,
             amount,
+            isAutoBid: false,
+            maxAutoBidAmount: maxAutoBidAmount || undefined,
             isWinning: true,
             ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
         });
@@ -67,6 +128,28 @@ export async function POST(request: NextRequest) {
             currentPrice: amount,
             $inc: { totalBids: 1 },
         });
+
+        if (previousBidderId && previousBidderId !== payload.userId) {
+            try {
+                await notifyOutbid(previousBidderId, auctionId, auction.title, amount);
+            } catch { }
+        }
+
+        const autoBidResult = await processAutoBids(
+            auctionId,
+            payload.userId,
+            amount,
+            auction.bidIncrement
+        );
+
+        if (autoBidResult) {
+            return NextResponse.json({
+                message: 'Bid placed, but you were outbid by auto-bid!',
+                bid,
+                outbid: true,
+                currentPrice: autoBidResult.amount,
+            }, { status: 201 });
+        }
 
         return NextResponse.json({ message: 'Bid placed successfully', bid }, { status: 201 });
     } catch (error) {

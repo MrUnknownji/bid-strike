@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AuctionGrid from '@/components/auction/AuctionGrid';
+import AuctionFilters, { Filters } from '@/components/auction/AuctionFilters';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,7 @@ export default function AuctionsPage() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [filters, setFilters] = useState<Filters>({});
 
     useEffect(() => {
         setIsLoggedIn(!!localStorage.getItem('accessToken'));
@@ -56,6 +58,10 @@ export default function AuctionsPage() {
                 } else if (selectedCategory) {
                     params.append('category', selectedCategory);
                 }
+                if (filters.minPrice) params.append('minPrice', filters.minPrice);
+                if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+                if (filters.condition) params.append('condition', filters.condition);
+                if (filters.sort) params.append('sort', filters.sort);
 
                 const res = await fetch(`/api/auctions?${params}`);
                 if (res.ok) {
@@ -71,7 +77,7 @@ export default function AuctionsPage() {
 
         const debounce = setTimeout(fetchAuctions, 300);
         return () => clearTimeout(debounce);
-    }, [search, selectedCategory, selectedSubcategory]);
+    }, [search, selectedCategory, selectedSubcategory, filters]);
 
     const handleCategoryClick = (categoryId: string) => {
         if (selectedCategory === categoryId) {
@@ -95,10 +101,11 @@ export default function AuctionsPage() {
         setSelectedCategory(null);
         setSelectedSubcategory(null);
         setSearch('');
+        setFilters({});
     };
 
     const activeCategory = categories.find(c => c._id === selectedCategory);
-    const hasFilters = selectedCategory || selectedSubcategory || search;
+    const hasFilters = selectedCategory || selectedSubcategory || search || filters.minPrice || filters.maxPrice || filters.condition;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -115,6 +122,7 @@ export default function AuctionsPage() {
                                 className="pl-9 w-full sm:w-64 h-9"
                             />
                         </div>
+                        <AuctionFilters activeFilters={filters} onFiltersChange={setFilters} />
                         {isLoggedIn && (
                             <Link href="/auctions/create">
                                 <Button size="sm">New Auction</Button>
@@ -176,7 +184,7 @@ export default function AuctionsPage() {
                             </Badge>
                         )}
                         <Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 gap-1 text-xs px-2">
-                            <X className="w-3 h-3" /> Clear
+                            <X className="w-3 h-3" /> Clear All
                         </Button>
                     </div>
                 )}
@@ -186,4 +194,3 @@ export default function AuctionsPage() {
         </div>
     );
 }
-

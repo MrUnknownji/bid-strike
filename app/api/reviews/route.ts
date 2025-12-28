@@ -4,6 +4,41 @@ import Review from '@/lib/db/Review';
 import User from '@/lib/db/User';
 import { getTokenFromRequest } from '@/lib/middleware/auth';
 
+export async function GET(request: NextRequest) {
+    try {
+        await connectDB();
+
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '10');
+
+        if (!userId) {
+            return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+        }
+
+        const total = await Review.countDocuments({ reviewee: userId });
+        const reviews = await Review.find({ reviewee: userId })
+            .populate('reviewer', 'username avatar')
+            .populate('auction', 'title images')
+            .sort('-createdAt')
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const user = await User.findById(userId).select('rating totalReviews');
+
+        return NextResponse.json({
+            reviews,
+            averageRating: user?.rating || 0,
+            totalReviews: user?.totalReviews || 0,
+            pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+        });
+    } catch (error) {
+        console.error('Get reviews error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         const payload = getTokenFromRequest(request);
@@ -60,3 +95,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+

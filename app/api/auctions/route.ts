@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
         const subcategory = searchParams.get('subcategory');
         const search = searchParams.get('search');
         const sort = searchParams.get('sort') || '-createdAt';
+        const minPrice = searchParams.get('minPrice');
+        const maxPrice = searchParams.get('maxPrice');
+        const condition = searchParams.get('condition');
 
         const now = new Date();
         await Auction.updateMany(
@@ -41,6 +44,16 @@ export async function GET(request: NextRequest) {
             const subcategories = await Category.find({ parent: category }).select('_id');
             const categoryIds = [category, ...subcategories.map(s => s._id)];
             query.category = { $in: categoryIds };
+        }
+
+        if (minPrice || maxPrice) {
+            query.currentPrice = {};
+            if (minPrice) (query.currentPrice as Record<string, number>).$gte = parseFloat(minPrice);
+            if (maxPrice) (query.currentPrice as Record<string, number>).$lte = parseFloat(maxPrice);
+        }
+
+        if (condition) {
+            query.condition = condition;
         }
 
         if (search) {

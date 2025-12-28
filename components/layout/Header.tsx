@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 export default function Header() {
     const pathname = usePathname();
@@ -14,6 +15,7 @@ export default function Header() {
         { href: '/', label: 'Home' },
         { href: '/auctions', label: 'Auctions' },
         ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+        ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin' }] : []),
     ];
 
     return (
@@ -47,6 +49,7 @@ export default function Header() {
                     </nav>
 
                     <div className="flex items-center gap-2">
+                        <NotificationBell />
                         <ThemeToggle />
                         {!isLoading && (
                             <>

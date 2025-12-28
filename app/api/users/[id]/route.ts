@@ -11,7 +11,7 @@ export async function GET(
         const { id } = await params;
 
         const user = await User.findById(id).select(
-            'username firstName lastName avatar rating totalReviews totalAuctionsListed createdAt'
+            'username firstName lastName avatar rating totalReviews totalAuctionsListed totalAuctionsWon createdAt'
         );
 
         if (!user) {
