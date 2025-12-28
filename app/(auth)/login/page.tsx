@@ -4,18 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 export default function LoginPage() {
     return (
-        <div className="min-h-[600px] flex items-center justify-center py-12 px-4">
-            <Card className="max-w-md w-full">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Welcome Back</CardTitle>
-                    <CardDescription>Sign in to your account</CardDescription>
+        <div className="min-h-[600px] flex items-center justify-center py-12 px-4 bg-gradient-to-b from-muted/30 via-transparent to-transparent">
+            <Card className="max-w-md w-full border-border/50">
+                <CardHeader className="text-center pb-4">
+                    <CardTitle className="text-2xl tracking-tight">Welcome Back</CardTitle>
+                    <CardDescription className="text-sm">Sign in to your account</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <LoginForm />
 
                     <p className="mt-6 text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{' '}
-                        <Link href="/register" className="text-primary hover:underline">
+                        <Link href="/register" className="text-primary hover:underline underline-offset-4">
                             Sign up
                         </Link>
                     </p>
@@ -24,3 +24,4 @@ export default function LoginPage() {
         </div>
     );
 }
+

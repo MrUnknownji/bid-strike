@@ -41,29 +41,27 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
   }, [endTime, onEnd]);
 
   if (isEnded) {
-    return <span className="text-destructive font-bold">Ended</span>;
+    return <span className="text-destructive font-semibold text-sm tracking-wide">Ended</span>;
   }
 
+  const TimeBox = ({ value, label }: { value: number | string; label: string }) => (
+    <div className="bg-muted/50 border border-border/50 px-3 py-2 rounded-md text-center min-w-[52px]">
+      <span className="text-xl font-semibold text-foreground font-mono tabular-nums">
+        {typeof value === 'number' ? String(value).padStart(2, '0') : value}
+      </span>
+      <span className="text-[10px] block text-muted-foreground uppercase tracking-wider mt-0.5">
+        {label}
+      </span>
+    </div>
+  );
+
   return (
-    <div className="flex gap-2 text-center">
-      {timeLeft.days > 0 && (
-        <div className="bg-muted px-3 py-2 rounded">
-          <span className="text-xl font-bold text-foreground">{timeLeft.days}</span>
-          <span className="text-xs block text-muted-foreground">days</span>
-        </div>
-      )}
-      <div className="bg-muted px-3 py-2 rounded">
-        <span className="text-xl font-bold text-foreground">{String(timeLeft.hours).padStart(2, '0')}</span>
-        <span className="text-xs block text-muted-foreground">hrs</span>
-      </div>
-      <div className="bg-muted px-3 py-2 rounded">
-        <span className="text-xl font-bold text-foreground">{String(timeLeft.minutes).padStart(2, '0')}</span>
-        <span className="text-xs block text-muted-foreground">min</span>
-      </div>
-      <div className="bg-muted px-3 py-2 rounded">
-        <span className="text-xl font-bold text-foreground">{String(timeLeft.seconds).padStart(2, '0')}</span>
-        <span className="text-xs block text-muted-foreground">sec</span>
-      </div>
+    <div className="flex gap-2">
+      {timeLeft.days > 0 && <TimeBox value={timeLeft.days} label="days" />}
+      <TimeBox value={timeLeft.hours} label="hrs" />
+      <TimeBox value={timeLeft.minutes} label="min" />
+      <TimeBox value={timeLeft.seconds} label="sec" />
     </div>
   );
 }
+

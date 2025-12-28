@@ -122,10 +122,10 @@ export default function ProfilePage() {
     if (!user) return null;
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-                <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <div className="max-w-2xl mx-auto px-4 py-10">
+            <div className="mb-10">
+                <h1 className="text-2xl font-bold tracking-tight mb-2">Your Profile</h1>
+                <p className="text-muted-foreground text-sm">Manage your account settings and preferences</p>
             </div>
 
             {message.text && (
@@ -145,10 +145,10 @@ export default function ProfilePage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profile Picture</CardTitle>
-                        <CardDescription>Upload a custom photo or choose from defaults</CardDescription>
+                <Card className="border-border/50">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-base">Profile Picture</CardTitle>
+                        <CardDescription className="text-xs">Upload a custom photo or choose from defaults</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <AvatarPicker
@@ -159,9 +159,9 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                <Card className="border-border/50">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="flex items-center gap-2 text-base">
                             <User className="w-5 h-5 text-primary" />
                             Account Information
                         </CardTitle>
@@ -182,9 +182,9 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Personal Details</CardTitle>
+                <Card className="border-border/50">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-base">Personal Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">

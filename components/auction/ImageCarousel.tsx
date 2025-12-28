@@ -160,9 +160,9 @@ export default function ImageCarousel({
                 onClick={goToPrevious}
                 className={cn(
                     'absolute left-2 top-1/2 -translate-y-1/2 z-10',
-                    'w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center',
+                    'w-8 h-8 rounded-full bg-card/90 text-card-foreground flex items-center justify-center',
                     'opacity-0 group-hover:opacity-100 transition-all duration-200',
-                    'hover:bg-black/80 hover:scale-110',
+                    'hover:bg-card hover:scale-110',
                     'focus:outline-none focus:ring-2 focus:ring-primary'
                 )}
                 aria-label="Previous image"
@@ -174,9 +174,9 @@ export default function ImageCarousel({
                 onClick={goToNext}
                 className={cn(
                     'absolute right-2 top-1/2 -translate-y-1/2 z-10',
-                    'w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center',
+                    'w-8 h-8 rounded-full bg-card/90 text-card-foreground flex items-center justify-center',
                     'opacity-0 group-hover:opacity-100 transition-all duration-200',
-                    'hover:bg-black/80 hover:scale-110',
+                    'hover:bg-card hover:scale-110',
                     'focus:outline-none focus:ring-2 focus:ring-primary'
                 )}
                 aria-label="Next image"
@@ -204,16 +204,6 @@ export default function ImageCarousel({
                         aria-label={`Go to image ${index + 1}`}
                     />
                 ))}
-            </div>
-
-            <div
-                className={cn(
-                    'absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full text-xs font-medium',
-                    'bg-black/60 text-white',
-                    'opacity-0 group-hover:opacity-100 transition-opacity duration-200'
-                )}
-            >
-                {currentIndex + 1}/{validImages.length}
             </div>
         </div>
     );

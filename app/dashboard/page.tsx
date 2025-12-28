@@ -164,32 +164,32 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="flex items-center justify-between mb-10">
                 <div>
-                    <h1 className="text-2xl font-bold">Welcome back, {user.username}</h1>
-                    <p className="text-muted-foreground">Here's what's happening with your auctions</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user.username}</h1>
+                    <p className="text-muted-foreground text-sm mt-1">Here's what's happening with your auctions</p>
                 </div>
                 <Link href="/auctions/create">
-                    <Button className="gap-2">
+                    <Button size="sm" className="gap-2">
                         <Plus className="w-4 h-4" />
                         New Auction
                     </Button>
                 </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                 {statCards.map((stat) => (
                     <Link key={stat.label} href={stat.href}>
-                        <Card className="hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer">
-                            <CardContent className="pt-6">
+                        <Card className="hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer border-border/50">
+                            <CardContent className="pt-5 pb-5">
                                 <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${stat.bg}`}>
-                                        <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                                    <div className={`p-2.5 rounded-lg ${stat.bg}`}>
+                                        <stat.icon className={`w-4 h-4 ${stat.color}`} />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">{stat.label}</p>
-                                        <p className="text-2xl font-bold">{stat.value}</p>
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                                        <p className="text-xl font-semibold mt-0.5">{stat.value}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -198,9 +198,9 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-border/50">
+                    <CardHeader className="flex flex-row items-center justify-between pb-4">
                         <CardTitle className="flex items-center gap-2">
                             <Gavel className="w-5 h-5 text-primary" />
                             My Auctions
@@ -245,11 +245,11 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
+                <Card className="border-border/50">
+                    <CardHeader className="pb-4">
                         <CardTitle>Quick Actions</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-2.5">
                         <Link href="/auctions/create" className="block">
                             <Button variant="outline" className="w-full justify-start gap-2">
                                 <Plus className="w-4 h-4" />

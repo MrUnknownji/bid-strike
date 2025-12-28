@@ -17,37 +17,44 @@ export default function Header() {
     ];
 
     return (
-        <header className="bg-card border-b sticky top-0 z-40">
+        <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    <Link href="/" className="text-xl font-bold text-primary transition-colors hover:text-primary/80">
+                    <Link
+                        href="/"
+                        className="text-xl font-bold text-foreground tracking-tight transition-colors hover:text-primary"
+                    >
                         BidStrike
                     </Link>
 
-                    <nav className="hidden md:flex space-x-8">
+                    <nav className="hidden md:flex items-center gap-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`text-sm font-medium transition-colors ${pathname === link.href
-                                        ? 'text-primary'
-                                        : 'text-muted-foreground hover:text-foreground'
+                                className={`relative text-sm font-medium transition-colors duration-200 py-1 ${pathname === link.href
+                                    ? 'text-foreground'
+                                    : 'text-muted-foreground hover:text-foreground'
                                     }`}
                             >
                                 {link.label}
+                                <span
+                                    className={`absolute left-0 -bottom-0.5 h-px bg-primary transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'
+                                        }`}
+                                />
                             </Link>
                         ))}
                     </nav>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <ThemeToggle />
                         {!isLoading && (
                             <>
                                 {user ? (
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
                                         <Link
                                             href="/profile"
-                                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline"
+                                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline px-2"
                                         >
                                             {user.username}
                                         </Link>
@@ -56,14 +63,14 @@ export default function Header() {
                                         </Button>
                                     </div>
                                 ) : (
-                                    <>
+                                    <div className="flex items-center gap-1">
                                         <Link href="/login">
                                             <Button variant="ghost" size="sm">Login</Button>
                                         </Link>
                                         <Link href="/register">
                                             <Button size="sm">Sign Up</Button>
                                         </Link>
-                                    </>
+                                    </div>
                                 )}
                             </>
                         )}

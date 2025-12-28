@@ -101,39 +101,38 @@ export default function AuctionsPage() {
     const hasFilters = selectedCategory || selectedSubcategory || search;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col gap-4 mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="flex flex-col gap-5 mb-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h1 className="text-2xl font-bold">Browse Auctions</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Browse Auctions</h1>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-none">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search auctions, categories..."
+                                placeholder="Search auctions..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 w-full sm:w-72"
+                                className="pl-9 w-full sm:w-64 h-9"
                             />
                         </div>
                         {isLoggedIn && (
                             <Link href="/auctions/create">
-                                <Button className="whitespace-nowrap">New Auction</Button>
+                                <Button size="sm">New Auction</Button>
                             </Link>
                         )}
                     </div>
                 </div>
 
-                {/* Categories */}
                 <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
                         <button
                             key={cat._id}
                             onClick={() => handleCategoryClick(cat._id)}
                             className={cn(
-                                'px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+                                'px-3 py-1.5 rounded-full text-sm font-medium transition-all border',
                                 selectedCategory === cat._id
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted hover:bg-muted/80'
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-transparent border-border text-muted-foreground hover:text-foreground hover:border-foreground/30'
                             )}
                         >
                             {cat.name}
@@ -141,7 +140,6 @@ export default function AuctionsPage() {
                     ))}
                 </div>
 
-                {/* Subcategories */}
                 {activeCategory && activeCategory.subcategories.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                         {activeCategory.subcategories.map((sub) => (
@@ -149,10 +147,10 @@ export default function AuctionsPage() {
                                 key={sub._id}
                                 onClick={() => handleSubcategoryClick(sub._id)}
                                 className={cn(
-                                    'px-2.5 py-1 rounded-full text-xs font-medium transition-all',
+                                    'px-2.5 py-1 rounded-full text-xs font-medium transition-all border',
                                     selectedSubcategory === sub._id
-                                        ? 'bg-primary/80 text-primary-foreground'
-                                        : 'bg-muted/60 hover:bg-muted'
+                                        ? 'bg-primary/80 text-primary-foreground border-primary/80'
+                                        : 'bg-transparent border-border/70 text-muted-foreground hover:text-foreground hover:border-foreground/30'
                                 )}
                             >
                                 {sub.name}
@@ -161,12 +159,11 @@ export default function AuctionsPage() {
                     </div>
                 )}
 
-                {/* Active Filters */}
                 {hasFilters && (
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm text-muted-foreground">Filters:</span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Active:</span>
                         {selectedCategory && activeCategory && (
-                            <Badge variant="secondary" className="gap-1">
+                            <Badge variant="secondary" className="gap-1 text-xs">
                                 {activeCategory.name}
                                 {selectedSubcategory && (
                                     <> / {activeCategory.subcategories.find(s => s._id === selectedSubcategory)?.name}</>
@@ -174,11 +171,11 @@ export default function AuctionsPage() {
                             </Badge>
                         )}
                         {search && (
-                            <Badge variant="secondary" className="gap-1">
+                            <Badge variant="secondary" className="gap-1 text-xs">
                                 "{search}"
                             </Badge>
                         )}
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 gap-1 text-xs">
+                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 gap-1 text-xs px-2">
                             <X className="w-3 h-3" /> Clear
                         </Button>
                     </div>
@@ -189,3 +186,4 @@ export default function AuctionsPage() {
         </div>
     );
 }
+

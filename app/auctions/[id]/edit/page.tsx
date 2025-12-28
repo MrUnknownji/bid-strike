@@ -512,7 +512,7 @@ export default function EditAuctionPage() {
                             Images
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-0 flex flex-col gap-4">
                         <MemoizedImageUploader onImagesSelect={handleImagesSelect} />
                         <MemoizedImagePreview
                             images={images}

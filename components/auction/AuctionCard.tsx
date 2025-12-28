@@ -22,28 +22,28 @@ interface AuctionCardProps {
 export default function AuctionCard({ auction }: AuctionCardProps) {
     return (
         <Link href={`/auctions/${auction._id}`}>
-            <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer group">
+            <Card className="h-full transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer group border-border/50">
                 <div className="relative overflow-hidden">
                     <ImageCarousel images={auction.images} />
-                    <Badge className="absolute top-2 right-2 z-20" variant="secondary">
+                    <Badge className="absolute top-3 right-3 z-20 text-xs" variant="secondary">
                         {formatTimeRemaining(auction.endTime)}
                     </Badge>
                     {auction.status === 'scheduled' && (
-                        <Badge className="absolute top-2 left-2 z-20 bg-background text-foreground hover:bg-background/90" variant="outline">
+                        <Badge className="absolute top-3 left-3 z-20 bg-background/90 text-foreground hover:bg-background/90 text-xs" variant="outline">
                             Upcoming
                         </Badge>
                     )}
                 </div>
 
-                <CardContent className="p-4">
-                    <h3 className="font-medium text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                <CardContent className="p-5">
+                    <h3 className="font-medium text-foreground line-clamp-2 mb-3 group-hover:text-primary transition-colors leading-snug">
                         {auction.title}
                     </h3>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-end">
                         <div>
-                            <p className="text-xs text-muted-foreground">Current Bid</p>
-                            <p className="text-lg font-bold text-primary">
+                            <p className="text-xs text-muted-foreground mb-0.5">Current Bid</p>
+                            <p className="text-lg font-semibold text-primary tracking-tight">
                                 {formatCurrency(auction.currentPrice)}
                             </p>
                         </div>
@@ -57,4 +57,5 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
         </Link>
     );
 }
+
 

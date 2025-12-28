@@ -6,12 +6,12 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const DEFAULT_AVATARS = [
-    { id: 'default-1', gradient: 'from-violet-500 to-purple-600' },
-    { id: 'default-2', gradient: 'from-blue-500 to-cyan-500' },
-    { id: 'default-3', gradient: 'from-emerald-500 to-teal-500' },
-    { id: 'default-4', gradient: 'from-orange-500 to-amber-500' },
-    { id: 'default-5', gradient: 'from-rose-500 to-pink-500' },
-    { id: 'default-6', gradient: 'from-indigo-500 to-blue-600' },
+    { id: 'default-1', bg: 'bg-primary' },
+    { id: 'default-2', bg: 'bg-primary/80' },
+    { id: 'default-3', bg: 'bg-secondary' },
+    { id: 'default-4', bg: 'bg-accent' },
+    { id: 'default-5', bg: 'bg-muted' },
+    { id: 'default-6', bg: 'bg-primary/60' },
 ];
 
 interface AvatarPickerProps {
@@ -84,11 +84,11 @@ export default function AvatarPicker({
                         ) : selectedId ? (
                             <div
                                 className={cn(
-                                    'w-full h-full flex items-center justify-center bg-gradient-to-br',
-                                    DEFAULT_AVATARS.find((a) => a.id === selectedId)?.gradient
+                                    'w-full h-full flex items-center justify-center',
+                                    DEFAULT_AVATARS.find((a) => a.id === selectedId)?.bg
                                 )}
                             >
-                                <span className="text-3xl font-bold text-white">
+                                <span className="text-3xl font-bold text-primary-foreground">
                                     {getInitials()}
                                 </span>
                             </div>
@@ -142,11 +142,11 @@ export default function AvatarPicker({
                             >
                                 <div
                                     className={cn(
-                                        'w-full h-full flex items-center justify-center bg-gradient-to-br',
-                                        avatar.gradient
+                                        'w-full h-full flex items-center justify-center',
+                                        avatar.bg
                                     )}
                                 >
-                                    <span className="text-sm font-bold text-white">
+                                    <span className="text-sm font-bold text-primary-foreground">
                                         {getInitials()}
                                     </span>
                                 </div>
