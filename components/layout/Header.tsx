@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -19,31 +20,34 @@ export default function Header() {
     ];
 
     return (
-        <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-40">
+        <header className="bg-card/80 backdrop-blur-lg border-b border-border/40 sticky top-0 z-40 animate-fade-down">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <Link
                         href="/"
-                        className="text-xl font-bold text-foreground tracking-tight transition-colors hover:text-primary"
+                        className="flex items-center gap-2.5 text-xl font-bold text-foreground tracking-tight transition-all duration-300 hover:opacity-80 group"
                     >
-                        BidStrike
+                        <Image
+                            src="/icon.svg"
+                            alt="BidStrike"
+                            width={32}
+                            height={32}
+                            className="rounded-lg"
+                        />
+                        <span>BidStrike</span>
                     </Link>
 
-                    <nav className="hidden md:flex items-center gap-8">
+                    <nav className="hidden md:flex items-center gap-1">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`relative text-sm font-medium transition-colors duration-200 py-1 ${pathname === link.href
-                                    ? 'text-foreground'
-                                    : 'text-muted-foreground hover:text-foreground'
+                                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${pathname === link.href
+                                    ? 'text-primary bg-primary/10'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                     }`}
                             >
                                 {link.label}
-                                <span
-                                    className={`absolute left-0 -bottom-0.5 h-px bg-primary transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'
-                                        }`}
-                                />
                             </Link>
                         ))}
                     </nav>
@@ -54,24 +58,29 @@ export default function Header() {
                         {!isLoading && (
                             <>
                                 {user ? (
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 ml-2">
                                         <Link
                                             href="/profile"
-                                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline px-2"
+                                            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200"
                                         >
-                                            {user.username}
+                                            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
+                                                {user.username[0].toUpperCase()}
+                                            </div>
+                                            <span className="text-sm font-medium text-foreground">
+                                                {user.username}
+                                            </span>
                                         </Link>
-                                        <Button variant="ghost" size="sm" onClick={logout}>
+                                        <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-foreground">
                                             Logout
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-2 ml-2">
                                         <Link href="/login">
                                             <Button variant="ghost" size="sm">Login</Button>
                                         </Link>
                                         <Link href="/register">
-                                            <Button size="sm">Sign Up</Button>
+                                            <Button size="sm" className="shadow-sm shadow-primary/20">Sign Up</Button>
                                         </Link>
                                     </div>
                                 )}

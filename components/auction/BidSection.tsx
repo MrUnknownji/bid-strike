@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { useSocket } from '@/hooks/useSocket';
 import { useAuth } from '@/context/AuthContext';
-import { Zap } from 'lucide-react';
+import { Zap, Clock } from 'lucide-react';
 
 interface BidSectionProps {
     auctionId: string;
     currentPrice: number;
     bidIncrement: number;
     isEnded: boolean;
+    startTime: string;
     onBidPlaced?: () => void;
     onPriceUpdate?: (newPrice: number) => void;
 }
@@ -24,6 +25,7 @@ export default function BidSection({
     currentPrice,
     bidIncrement,
     isEnded,
+    startTime,
     onBidPlaced,
     onPriceUpdate,
 }: BidSectionProps) {
@@ -37,6 +39,9 @@ export default function BidSection({
     const [lastBidder, setLastBidder] = useState<string | null>(null);
     const [autoBidEnabled, setAutoBidEnabled] = useState(false);
     const [maxAutoBid, setMaxAutoBid] = useState('');
+
+    const isStarted = new Date(startTime) <= new Date();
+    const isActive = isStarted && !isEnded;
 
     const handleBidUpdate = useCallback((bid: { amount: number; bidder: string }) => {
         setPrice(bid.amount);
@@ -59,6 +64,11 @@ export default function BidSection({
         e.preventDefault();
         setError('');
         setSuccess('');
+
+        if (!isStarted) {
+            setError('Auction has not started yet');
+            return;
+        }
 
         const amount = parseFloat(bidAmount);
         if (isNaN(amount) || amount < minBid) {
@@ -131,18 +141,42 @@ export default function BidSection({
         );
     }
 
+    if (!isStarted) {
+        return (
+            <Card>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <CardTitle>Place Your Bid</CardTitle>
+                        <div className="flex items-center gap-1.5">
+                            <Clock className="h-4 w-4 text-amber-500" />
+                            <span className="text-xs text-amber-500 font-medium">Upcoming</span>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="text-center py-6">
+                    <p className="text-muted-foreground mb-2">Bidding not yet open</p>
+                    <p className="text-sm text-muted-foreground">
+                        Starting price: {formatCurrency(currentPrice)}
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     return (
         <Card>
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                     <CardTitle>Place Your Bid</CardTitle>
-                    <div className="flex items-center gap-1.5">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                        <span className="text-xs text-muted-foreground">Live</span>
-                    </div>
+                    {isActive && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span className="text-xs text-muted-foreground">Live</span>
+                        </div>
+                    )}
                 </div>
             </CardHeader>
             <CardContent>
@@ -178,8 +212,8 @@ export default function BidSection({
                             type="button"
                             onClick={() => setAutoBidEnabled(!autoBidEnabled)}
                             className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${autoBidEnabled
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border hover:border-primary/50'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50'
                                 }`}
                         >
                             <div className="flex items-center gap-2">

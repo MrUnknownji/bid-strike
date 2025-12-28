@@ -10,6 +10,7 @@ interface CountdownTimerProps {
 export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isEnded, setIsEnded] = useState(false);
+  const [isUrgent, setIsUrgent] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -22,6 +23,8 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
         onEnd?.();
         return { days: 0, hours: 0, minutes: 0, seconds: 0 };
       }
+
+      setIsUrgent(diff < 3600000);
 
       return {
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -41,22 +44,31 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
   }, [endTime, onEnd]);
 
   if (isEnded) {
-    return <span className="text-destructive font-semibold text-sm tracking-wide">Ended</span>;
+    return (
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive">
+        <div className="w-2 h-2 rounded-full bg-destructive" />
+        <span className="font-semibold text-sm tracking-wide">Ended</span>
+      </div>
+    );
   }
 
   const TimeBox = ({ value, label }: { value: number | string; label: string }) => (
-    <div className="bg-muted/50 border border-border/50 px-3 py-2 rounded-md text-center min-w-[52px]">
-      <span className="text-xl font-semibold text-foreground font-mono tabular-nums">
+    <div className={`relative overflow-hidden px-3 py-2 rounded-lg text-center min-w-[52px] transition-all duration-300 ${isUrgent
+        ? 'bg-destructive/10 border border-destructive/30'
+        : 'bg-muted/60 border border-border/50'
+      }`}>
+      <span className={`text-xl font-bold font-mono tabular-nums transition-colors ${isUrgent ? 'text-destructive' : 'text-foreground'
+        }`}>
         {typeof value === 'number' ? String(value).padStart(2, '0') : value}
       </span>
-      <span className="text-[10px] block text-muted-foreground uppercase tracking-wider mt-0.5">
+      <span className="text-[10px] block text-muted-foreground uppercase tracking-wider mt-0.5 font-medium">
         {label}
       </span>
     </div>
   );
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5">
       {timeLeft.days > 0 && <TimeBox value={timeLeft.days} label="days" />}
       <TimeBox value={timeLeft.hours} label="hrs" />
       <TimeBox value={timeLeft.minutes} label="min" />
@@ -64,4 +76,3 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
     </div>
   );
 }
-

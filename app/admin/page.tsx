@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Users, Gavel, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react';
+import { Users, Gavel, TrendingUp, CheckCircle, ArrowRight, Settings } from 'lucide-react';
 
 interface Stats {
     totalUsers: number;
@@ -130,6 +130,11 @@ export default function AdminDashboardPage() {
                     <Link href="/admin/auctions">
                         <Button variant="outline" size="sm">
                             Manage Auctions
+                        </Button>
+                    </Link>
+                    <Link href="/admin/settings">
+                        <Button variant="outline" size="sm" className="gap-1">
+                            <Settings className="h-4 w-4" /> Settings
                         </Button>
                     </Link>
                 </div>

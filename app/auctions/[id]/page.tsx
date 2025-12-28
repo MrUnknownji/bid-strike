@@ -316,6 +316,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                         currentPrice={auction.currentPrice}
                         bidIncrement={auction.bidIncrement}
                         isEnded={isEnded}
+                        startTime={auction.startTime}
                         onBidPlaced={() => {
                             fetchAuction();
                             setBidRefreshTrigger(prev => prev + 1);
