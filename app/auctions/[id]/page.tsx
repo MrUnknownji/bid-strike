@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,33 +19,10 @@ import CountdownTimer from '@/components/auction/CountdownTimer';
 import BidSection from '@/components/auction/BidSection';
 import BidHistory from '@/components/auction/BidHistory';
 import { formatCurrency } from '@/lib/utils/formatters';
-import { Trash2, AlertTriangle, Pencil, Heart, Eye } from 'lucide-react';
-
-interface Auction {
-    _id: string;
-    title: string;
-    description: string;
-    images: string[];
-    currentPrice: number;
-    startingPrice: number;
-    bidIncrement: number;
-    startTime: string;
-    endTime: string;
-    status: string;
-    condition: string;
-    totalBids: number;
-    viewCount: number;
-    seller: {
-        _id: string;
-        username: string;
-        avatar?: string;
-        rating: number;
-    };
-    category?: {
-        name: string;
-    };
-    createdAt: string;
-}
+import { Trash2, AlertTriangle, Pencil, Heart, Eye, RefreshCw } from 'lucide-react';
+import { useAuction, useDeleteAuction } from '@/hooks/api/useAuctions';
+import { useToggleLike, useToggleWatchlist } from '@/hooks/api/useUser';
+import { useQueryClient } from '@tanstack/react-query';
 
 function PageLoader() {
     return (
@@ -65,34 +42,24 @@ function PageLoader() {
 export default function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
-    const [auction, setAuction] = useState<Auction | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
+
+    const { data, isLoading, error, refetch } = useAuction(id);
+    const auction = data?.auction;
+
+    const deleteAuction = useDeleteAuction();
+    const toggleLike = useToggleLike();
+    const toggleWatchlist = useToggleWatchlist();
+
     const [selectedImage, setSelectedImage] = useState(0);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
     const [isWatching, setIsWatching] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [bidRefreshTrigger, setBidRefreshTrigger] = useState(0);
 
-    const fetchAuction = async () => {
-        try {
-            const res = await fetch(`/api/auctions/${id}`);
-            if (res.ok) {
-                const data = await res.json();
-                setAuction(data.auction);
-            }
-        } catch (error) {
-            console.error('Failed to fetch auction:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchAuction();
-
         const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('accessToken');
         setIsLoggedIn(!!token);
@@ -106,7 +73,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
             }
         }
 
-        if (token) {
+        if (token && id) {
             fetch(`/api/user/status?auctionId=${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
@@ -120,33 +87,49 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
     }, [id]);
 
     const handleDelete = async () => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) return;
-
-        setIsDeleting(true);
         try {
-            const res = await fetch(`/api/auctions/${id}`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (res.ok) {
-                router.push('/dashboard/my-auctions');
-            }
+            await deleteAuction.mutateAsync(id);
+            router.push('/dashboard/my-auctions');
         } catch (error) {
             console.error('Failed to delete auction:', error);
         } finally {
-            setIsDeleting(false);
             setShowDeleteDialog(false);
+        }
+    };
+
+    const handleLike = async () => {
+        try {
+            const result = await toggleLike.mutateAsync(id);
+            setIsLiked(result.liked);
+        } catch (error) {
+            console.error('Failed to toggle like:', error);
+        }
+    };
+
+    const handleWatch = async () => {
+        try {
+            const result = await toggleWatchlist.mutateAsync(id);
+            setIsWatching(result.watching);
+        } catch (error) {
+            console.error('Failed to toggle watchlist:', error);
         }
     };
 
     if (isLoading) return <PageLoader />;
 
-    if (!auction) {
+    if (error || !auction) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-                <h1 className="text-2xl font-bold">Auction not found</h1>
+                <h1 className="text-2xl font-bold mb-4">
+                    {error ? 'Failed to load auction' : 'Auction not found'}
+                </h1>
+                <p className="text-muted-foreground mb-6">
+                    {error?.message || 'This auction may have been removed or the link is invalid.'}
+                </p>
+                <Button onClick={() => refetch()} variant="outline" className="gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Try Again
+                </Button>
             </div>
         );
     }
@@ -184,7 +167,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
 
                     {auction.images.length > 1 && (
                         <div className="flex gap-2 overflow-x-auto">
-                            {auction.images.map((img, i) => (
+                            {auction.images.map((img: string, i: number) => (
                                 <button
                                     key={i}
                                     onClick={() => setSelectedImage(i)}
@@ -244,22 +227,8 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                             <Button
                                 variant={isLiked ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={async () => {
-                                    const token = localStorage.getItem('accessToken');
-                                    if (!token) return;
-                                    const res = await fetch('/api/user/like', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                        body: JSON.stringify({ auctionId: id }),
-                                    });
-                                    if (res.ok) {
-                                        const data = await res.json();
-                                        setIsLiked(data.liked);
-                                    }
-                                }}
+                                onClick={handleLike}
+                                disabled={toggleLike.isPending}
                                 className="gap-1"
                             >
                                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
@@ -268,22 +237,8 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                             <Button
                                 variant={isWatching ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={async () => {
-                                    const token = localStorage.getItem('accessToken');
-                                    if (!token) return;
-                                    const res = await fetch('/api/user/watchlist', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                        body: JSON.stringify({ auctionId: id }),
-                                    });
-                                    if (res.ok) {
-                                        const data = await res.json();
-                                        setIsWatching(data.watching);
-                                    }
-                                }}
+                                onClick={handleWatch}
+                                disabled={toggleWatchlist.isPending}
                                 className="gap-1"
                             >
                                 <Eye className={`w-4 h-4 ${isWatching ? 'fill-current' : ''}`} />
@@ -318,7 +273,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                         isEnded={isEnded}
                         startTime={auction.startTime}
                         onBidPlaced={() => {
-                            fetchAuction();
+                            queryClient.invalidateQueries({ queryKey: ['auction', id] });
                             setBidRefreshTrigger(prev => prev + 1);
                         }}
                     />
@@ -385,8 +340,8 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                         <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-                            {isDeleting ? 'Deleting...' : 'Delete Auction'}
+                        <Button variant="destructive" onClick={handleDelete} disabled={deleteAuction.isPending}>
+                            {deleteAuction.isPending ? 'Deleting...' : 'Delete Auction'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

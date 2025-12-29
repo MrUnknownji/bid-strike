@@ -17,17 +17,33 @@ if (!cached) {
     cached = global.mongoose = { conn: null, promise: null };
 }
 
+const connectionOptions = {
+    bufferCommands: false,
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 10000,
+};
+
 export async function connectDB() {
     if (cached!.conn) {
         return cached!.conn;
     }
 
     if (!cached!.promise) {
-        cached!.promise = mongoose.connect(MONGODB_URI);
+        cached!.promise = mongoose.connect(MONGODB_URI, connectionOptions).catch((err) => {
+            cached!.promise = null;
+            throw err;
+        });
     }
 
-    cached!.conn = await cached!.promise;
-    return cached!.conn;
+    try {
+        cached!.conn = await cached!.promise;
+        return cached!.conn;
+    } catch (error) {
+        cached!.promise = null;
+        throw error;
+    }
 }
 
 export default connectDB;

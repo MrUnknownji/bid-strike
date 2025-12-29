@@ -16,89 +16,28 @@ import {
     ArrowRight,
     Clock,
     Heart,
+    RefreshCw,
 } from 'lucide-react';
-
-interface User {
-    id: string;
-    username: string;
-    email: string;
-    rating: number;
-    totalAuctionsWon: number;
-    totalAuctionsListed: number;
-}
-
-interface RecentAuction {
-    _id: string;
-    title: string;
-    currentPrice: number;
-    status: string;
-    endTime: string;
-}
-
-interface Stats {
-    liked: number;
-    watchlist: number;
-    auctionsWon: number;
-    listedAuctions: number;
-}
+import { useMyAuctions } from '@/hooks/api/useAuctions';
+import { useLikedAuctions, useWatchlist } from '@/hooks/api/useUser';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DashboardPage() {
     const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
-    const [recentAuctions, setRecentAuctions] = useState<RecentAuction[]>([]);
-    const [stats, setStats] = useState<Stats>({ liked: 0, watchlist: 0, auctionsWon: 0, listedAuctions: 0 });
-    const [isLoading, setIsLoading] = useState(true);
+    const { user, isLoading: authLoading } = useAuth();
+
+    const { data: myAuctionsData, isLoading: auctionsLoading, error: auctionsError, refetch: refetchAuctions } = useMyAuctions({ limit: 3 });
+    const { data: likedData, isLoading: likedLoading } = useLikedAuctions();
+    const { data: watchlistData, isLoading: watchlistLoading } = useWatchlist();
+
+    const isLoading = authLoading || auctionsLoading || likedLoading || watchlistLoading;
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
-        if (!token) {
+        if (!authLoading && !token) {
             router.push('/login');
-            return;
         }
-
-        const fetchData = async () => {
-            try {
-                const [userRes, auctionsRes, likedRes, watchlistRes] = await Promise.all([
-                    fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch('/api/auctions/my?limit=3', { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch('/api/user/like', { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch('/api/user/watchlist', { headers: { Authorization: `Bearer ${token}` } }),
-                ]);
-
-                if (!userRes.ok) {
-                    localStorage.removeItem('accessToken');
-                    router.push('/login');
-                    return;
-                }
-
-                const userData = await userRes.json();
-                setUser(userData.user);
-
-                let listedCount = 0;
-                if (auctionsRes.ok) {
-                    const auctionsData = await auctionsRes.json();
-                    setRecentAuctions(auctionsData.auctions || []);
-                    listedCount = auctionsData.auctions?.length || 0;
-                }
-
-                const likedData = likedRes.ok ? await likedRes.json() : { auctions: [] };
-                const watchlistData = watchlistRes.ok ? await watchlistRes.json() : { auctions: [] };
-
-                setStats({
-                    liked: likedData.auctions?.length || 0,
-                    watchlist: watchlistData.auctions?.length || 0,
-                    auctionsWon: userData.user.totalAuctionsWon || 0,
-                    listedAuctions: listedCount,
-                });
-            } catch {
-                router.push('/login');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [router]);
+    }, [authLoading, router]);
 
     const getStatusBadge = (status: string) => {
         const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -127,6 +66,14 @@ export default function DashboardPage() {
     }
 
     if (!user) return null;
+
+    const recentAuctions = myAuctionsData?.auctions || [];
+    const stats = {
+        liked: likedData?.auctions?.length || 0,
+        watchlist: watchlistData?.auctions?.length || 0,
+        auctionsWon: (user as any)?.totalAuctionsWon || 0,
+        listedAuctions: recentAuctions.length,
+    };
 
     const statCards = [
         {
@@ -205,16 +152,31 @@ export default function DashboardPage() {
                             <Gavel className="w-5 h-5 text-primary" />
                             My Auctions
                         </CardTitle>
-                        <Link href="/dashboard/my-auctions">
-                            <Button variant="ghost" size="sm" className="gap-1">
-                                View All <ArrowRight className="w-4 h-4" />
-                            </Button>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            {auctionsError && (
+                                <Button variant="ghost" size="sm" onClick={() => refetchAuctions()}>
+                                    <RefreshCw className="w-4 h-4" />
+                                </Button>
+                            )}
+                            <Link href="/dashboard/my-auctions">
+                                <Button variant="ghost" size="sm" className="gap-1">
+                                    View All <ArrowRight className="w-4 h-4" />
+                                </Button>
+                            </Link>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        {recentAuctions.length > 0 ? (
+                        {auctionsError ? (
+                            <div className="text-center py-8">
+                                <p className="text-muted-foreground mb-3">Failed to load auctions</p>
+                                <Button variant="outline" size="sm" onClick={() => refetchAuctions()} className="gap-2">
+                                    <RefreshCw className="w-4 h-4" />
+                                    Try Again
+                                </Button>
+                            </div>
+                        ) : recentAuctions.length > 0 ? (
                             <div className="space-y-3">
-                                {recentAuctions.map((auction) => (
+                                {recentAuctions.map((auction: any) => (
                                     <Link
                                         key={auction._id}
                                         href={`/auctions/${auction._id}`}

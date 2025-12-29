@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReduxProvider } from "@/lib/redux/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/AuthContext";
+import QueryProvider from "@/components/providers/QueryProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -38,13 +39,15 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <AuthProvider>
-            <ReduxProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </ReduxProvider>
+            <QueryProvider>
+              <ReduxProvider>
+                <div className="min-h-screen flex flex-col">
+                  <Header />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </ReduxProvider>
+            </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
