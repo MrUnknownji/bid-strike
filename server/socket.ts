@@ -1,11 +1,25 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+    if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok' }));
+        return;
+    }
+    res.writeHead(200);
+    res.end('Socket.io server running');
+});
+
+const allowedOrigins = process.env.CLIENT_URL
+    ? [process.env.CLIENT_URL, 'http://localhost:3000']
+    : ['http://localhost:3000'];
+
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
+        credentials: true,
     },
 });
 
@@ -32,10 +46,12 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.SOCKET_PORT || 3001;
+const PORT = process.env.PORT || 3001;
+const HOST = '0.0.0.0';
 
-httpServer.listen(PORT, () => {
-    console.log(`WebSocket server running on port ${PORT}`);
+httpServer.listen(Number(PORT), HOST, () => {
+    console.log(`WebSocket server running on ${HOST}:${PORT}`);
+    console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
 });
 
 export { io };
