@@ -18,6 +18,7 @@ import Link from 'next/link';
 import ImageUploader from '@/components/common/ImageUploader';
 import ImagePreview from '@/components/common/ImagePreview';
 import SuggestionDialog from '@/components/common/SuggestionDialog';
+import { uploadToCloudinary } from '@/lib/utils/cloudinary';
 
 const CONDITIONS = [
     { value: 'new', label: 'New' },
@@ -181,6 +182,7 @@ export default function EditAuctionPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<string>('');
     const [error, setError] = useState('');
     const [canEdit, setCanEdit] = useState(false);
     const [editReason, setEditReason] = useState('');
@@ -369,20 +371,21 @@ export default function EditAuctionPage() {
     }, []);
 
     const uploadImages = async (): Promise<string[]> => {
-        const uploadPromises = images.map(async (img) => {
-            if (img.isExisting) return img.url;
+        const results: string[] = [];
+        const total = images.length;
+        let completed = 0;
 
-            const formData = new FormData();
-            formData.append('file', img.file!);
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            if (!res.ok) throw new Error('Failed to upload image');
-            const data = await res.json();
-            return data.url;
-        });
-        return Promise.all(uploadPromises);
+        for (const img of images) {
+            if (img.isExisting) {
+                results.push(img.url);
+            } else if (img.file) {
+                setUploadProgress(`Uploading ${completed + 1}/${total} images...`);
+                const result = await uploadToCloudinary(img.file);
+                results.push(result.url);
+            }
+            completed++;
+        }
+        return results;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -412,6 +415,7 @@ export default function EditAuctionPage() {
         }
 
         setIsSaving(true);
+        setUploadProgress('Preparing...');
 
         try {
             const startTime = new Date(
@@ -461,10 +465,11 @@ export default function EditAuctionPage() {
             }
 
             router.push(`/auctions/${id}`);
-        } catch {
-            setError('Something went wrong');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setIsSaving(false);
+            setUploadProgress('');
         }
     };
 
@@ -660,7 +665,12 @@ export default function EditAuctionPage() {
                         <Button type="button" variant="outline">Cancel</Button>
                     </Link>
                     <Button type="submit" disabled={isSaving || !canEdit} className="min-w-[120px]">
-                        {isSaving ? 'Saving...' : 'Save Changes'}
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {uploadProgress || 'Saving...'}
+                            </>
+                        ) : 'Save Changes'}
                     </Button>
                 </div>
             </form>

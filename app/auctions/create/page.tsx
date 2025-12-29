@@ -17,7 +17,8 @@ import {
 import ImageUploader from '@/components/common/ImageUploader';
 import ImagePreview, { PreviewImage } from '@/components/common/ImagePreview';
 import SuggestionDialog from '@/components/common/SuggestionDialog';
-import { ImageIcon, AlertCircle, Calendar, Clock, DollarSign, Tag } from 'lucide-react';
+import { uploadMultipleToCloudinary } from '@/lib/utils/cloudinary';
+import { ImageIcon, AlertCircle, Calendar, Clock, DollarSign, Tag, Loader2 } from 'lucide-react';
 
 const CONDITIONS = [
     { value: 'new', label: 'New' },
@@ -174,6 +175,7 @@ interface Category {
 export default function CreateAuctionPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<string>('');
     const [error, setError] = useState('');
     const [images, setImages] = useState<PreviewImage[]>([]);
     const [thumbnailId, setThumbnailId] = useState<string | null>(null);
@@ -296,9 +298,21 @@ export default function CreateAuctionPage() {
         }
 
         setIsLoading(true);
+        setUploadProgress('Uploading images...');
 
         try {
-            const imageUrls = images.map((img) => img.url);
+            const filesToUpload = images.filter(img => img.file).map(img => img.file as File);
+            let imageUrls: string[] = [];
+
+            if (filesToUpload.length > 0) {
+                const uploadResults = await uploadMultipleToCloudinary(
+                    filesToUpload,
+                    (completed, total) => setUploadProgress(`Uploading ${completed}/${total} images...`)
+                );
+                imageUrls = uploadResults.map(r => r.url);
+            }
+
+            setUploadProgress('Creating auction...');
             const thumbnailIndex = images.findIndex((img) => img.id === thumbnailId);
 
             const res = await fetch('/api/auctions', {
@@ -329,10 +343,11 @@ export default function CreateAuctionPage() {
             }
 
             router.push(`/auctions/${data.auction._id}`);
-        } catch {
-            setError('Something went wrong');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setIsLoading(false);
+            setUploadProgress('');
         }
     };
 
@@ -518,7 +533,12 @@ export default function CreateAuctionPage() {
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isLoading} className="min-w-[120px]">
-                        {isLoading ? 'Creating...' : 'Create Auction'}
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {uploadProgress || 'Creating...'}
+                            </>
+                        ) : 'Create Auction'}
                     </Button>
                 </div>
             </form>
