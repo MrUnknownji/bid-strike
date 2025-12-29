@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ interface Auction {
     };
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const auctionId = searchParams.get('auction');
@@ -243,5 +243,25 @@ export default function CheckoutPage() {
                 </DialogContent>
             </Dialog>
         </div>
+    );
+}
+
+function CheckoutLoading() {
+    return (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+            <Skeleton className="h-10 w-48 mb-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Skeleton className="h-96" />
+                <Skeleton className="h-80" />
+            </div>
+        </div>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={<CheckoutLoading />}>
+            <CheckoutContent />
+        </Suspense>
     );
 }
