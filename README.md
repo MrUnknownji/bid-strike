@@ -23,7 +23,7 @@ BidStrike is a feature-rich, real-time online auction platform with premium aest
 
 ---
 
-## 🏁 Getting Started
+## 🏁 Getting Started(Local setup)
 
 ### Prerequisites
 
