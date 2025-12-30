@@ -11,13 +11,16 @@ interface BidUpdate {
 
 interface UseSocketOptions {
     auctionId: string;
+    enabled?: boolean;
     onBidUpdate?: (bid: BidUpdate) => void;
 }
 
-export function useSocket({ auctionId, onBidUpdate }: UseSocketOptions) {
+export function useSocket({ auctionId, enabled = true, onBidUpdate }: UseSocketOptions) {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
+        if (!enabled) return;
+
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
         socketRef.current = io(socketUrl, {
             transports: ['websocket', 'polling'],
@@ -42,16 +45,16 @@ export function useSocket({ auctionId, onBidUpdate }: UseSocketOptions) {
             socket.emit('leave-auction', auctionId);
             socket.disconnect();
         };
-    }, [auctionId, onBidUpdate]);
+    }, [auctionId, enabled, onBidUpdate]);
 
     const emitBid = useCallback((bid: { amount: number; bidder: string }) => {
-        if (socketRef.current) {
+        if (socketRef.current && enabled) {
             socketRef.current.emit('new-bid', {
                 auctionId,
                 bid: { ...bid, timestamp: new Date().toISOString() },
             });
         }
-    }, [auctionId]);
+    }, [auctionId, enabled]);
 
     return { emitBid };
 }

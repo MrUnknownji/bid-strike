@@ -23,12 +23,18 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-fade-down">
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 transition-all duration-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+              }`}
+          >
             <Sparkles className="w-4 h-4" />
             <span>Live auctions happening now</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tight leading-[1.1] animate-fade-up">
+          <h1
+            className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tight leading-[1.1] transition-all duration-300 delay-75 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+          >
             Win Amazing Items at{' '}
             <br className="hidden sm:block" />
             <span className="text-primary relative">
@@ -39,21 +45,27 @@ export default function HomePage() {
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground mb-12 max-w-xl mx-auto leading-relaxed animate-fade-up stagger-2">
+          <p
+            className={`text-lg sm:text-xl text-muted-foreground mb-12 max-w-xl mx-auto leading-relaxed transition-all duration-300 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+          >
             Join thousands of bidders on the most trusted online auction platform.
             Find unique items and score incredible deals.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up stagger-3">
+          <div
+            className={`flex flex-col sm:flex-row gap-4 justify-center transition-all duration-300 delay-150 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+          >
             <Link href="/auctions">
-              <Button size="lg" className="gap-2 px-8 h-12 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300">
+              <Button size="lg" className="gap-2 px-8 h-12 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow duration-200">
                 Browse Auctions
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             {mounted && (
               <Link href={isLoggedIn ? '/auctions/create' : '/register'}>
-                <Button size="lg" variant="outline" className="gap-2 px-8 h-12 text-base hover:bg-primary/5 transition-all duration-300">
+                <Button size="lg" variant="outline" className="gap-2 px-8 h-12 text-base hover:bg-primary/5 transition-colors duration-200">
                   <Gavel className="w-4 h-4" />
                   {isLoggedIn ? 'Create Auction' : 'Start Selling'}
                 </Button>
@@ -92,17 +104,17 @@ export default function HomePage() {
                 desc: 'Win auctions and receive your items quickly and securely',
                 icon: Trophy,
               },
-            ].map((item, index) => (
+            ].map((item) => (
               <Card
                 key={item.step}
-                className={`relative overflow-hidden hover-lift group border-border/50 stagger-${index + 1}`}
+                className="relative overflow-hidden group border-border/50 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute top-4 right-4 text-6xl font-bold text-primary/10 select-none group-hover:text-primary/20 transition-colors duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute top-4 right-4 text-6xl font-bold text-primary/10 select-none group-hover:text-primary/20 transition-colors duration-200">
                   {item.step}
                 </div>
                 <CardContent className="pt-10 pb-10 relative">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
                     <item.icon className="w-6 h-6" />
                   </div>
                   <h3 className="font-bold text-xl mb-3">{item.title}</h3>
@@ -118,7 +130,7 @@ export default function HomePage() {
         <section className="py-24 sm:py-32">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <Card className="overflow-hidden border-border/50 relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative p-12 md:p-16 text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
                   <Gavel className="w-8 h-8" />

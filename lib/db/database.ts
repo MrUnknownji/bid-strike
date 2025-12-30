@@ -25,6 +25,18 @@ const connectionOptions = {
     connectTimeoutMS: 10000,
 };
 
+async function registerModels() {
+    await import('@/lib/db/User');
+    await import('@/lib/db/Auction');
+    await import('@/lib/db/Category');
+    await import('@/lib/db/Bid');
+    await import('@/lib/db/Settings');
+    await import('@/lib/db/Feedback');
+    await import('@/lib/db/Notification');
+    await import('@/lib/db/Review');
+    await import('@/lib/db/Transaction');
+}
+
 export async function connectDB() {
     if (cached!.conn) {
         return cached!.conn;
@@ -39,6 +51,7 @@ export async function connectDB() {
 
     try {
         cached!.conn = await cached!.promise;
+        await registerModels();
         return cached!.conn;
     } catch (error) {
         cached!.promise = null;

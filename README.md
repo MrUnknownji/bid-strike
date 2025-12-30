@@ -1,6 +1,7 @@
 # BidStrike - Modern Auction Platform
 
 BidStrike is a feature-rich, real-time online auction platform with premium aesthetics and robust functionality.
+Visit live preview at https://bid-strike.vercel.app/
 
 ## 🚀 Key Features
 
