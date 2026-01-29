@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import AuctionGrid from '@/components/auction/AuctionGrid';
 import AuctionFilters, { Filters } from '@/components/auction/AuctionFilters';
 import { Input } from '@/components/ui/input';
@@ -9,18 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface Auction {
-    _id: string;
-    title: string;
-    images: string[];
-    currentPrice: number;
-    endTime: string;
-    totalBids: number;
-    status: string;
-    seller: { username: string };
-    category?: { name: string; slug: string };
-}
+import { useAuctions } from '@/hooks/api/useAuctions';
+import { useCategories } from '@/hooks/api/useCategories';
+import { useAuth } from '@/context/AuthContext';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Category {
     _id: string;
@@ -30,55 +22,28 @@ interface Category {
 }
 
 export default function AuctionsPage() {
-    const [auctions, setAuctions] = useState<Auction[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { user } = useAuth();
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [filters, setFilters] = useState<Filters>({});
 
-    useEffect(() => {
-        setIsLoggedIn(!!localStorage.getItem('accessToken'));
-        fetch('/api/categories')
-            .then(res => res.json())
-            .then(data => setCategories(data.categories || []))
-            .catch(() => { });
-    }, []);
+    const debouncedSearch = useDebounce(search, 300);
 
-    useEffect(() => {
-        setIsLoading(true);
+    const { data: categoriesData } = useCategories();
+    const categories: Category[] = categoriesData?.categories || [];
 
-        const fetchAuctions = async () => {
-            try {
-                const params = new URLSearchParams();
-                if (search) params.append('search', search);
-                if (selectedSubcategory) {
-                    params.append('subcategory', selectedSubcategory);
-                } else if (selectedCategory) {
-                    params.append('category', selectedCategory);
-                }
-                if (filters.minPrice) params.append('minPrice', filters.minPrice);
-                if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
-                if (filters.condition) params.append('condition', filters.condition);
-                if (filters.sort) params.append('sort', filters.sort);
+    const { data: auctionsData, isLoading } = useAuctions({
+        search: debouncedSearch,
+        category: selectedCategory || undefined,
+        subcategory: selectedSubcategory || undefined,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        condition: filters.condition,
+        sort: filters.sort,
+    });
 
-                const res = await fetch(`/api/auctions?${params}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setAuctions(data.auctions);
-                }
-            } catch (error) {
-                console.error('Failed to fetch auctions:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const debounce = setTimeout(fetchAuctions, 300);
-        return () => clearTimeout(debounce);
-    }, [search, selectedCategory, selectedSubcategory, filters]);
+    const auctions = auctionsData?.auctions || [];
 
     const handleCategoryClick = (categoryId: string) => {
         if (selectedCategory === categoryId) {
@@ -124,7 +89,7 @@ export default function AuctionsPage() {
                             />
                         </div>
                         <AuctionFilters activeFilters={filters} onFiltersChange={setFilters} />
-                        {isLoggedIn && (
+                        {user && (
                             <Link href="/auctions/create">
                                 <Button size="sm">New Auction</Button>
                             </Link>
