@@ -22,22 +22,24 @@ export default function Header() {
     return (
         <header className="bg-card/80 backdrop-blur-lg border-b border-border/40 sticky top-0 z-40 animate-fade-down">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-2.5 text-xl font-bold text-foreground tracking-tight transition-all duration-300 hover:opacity-80 group"
-                    >
-                        <Image
-                            src="/icon.svg"
-                            alt="BidStrike"
-                            width={32}
-                            height={32}
-                            className="rounded-lg"
-                        />
-                        <span>BidStrike</span>
-                    </Link>
+                <div className="flex justify-between items-center h-16 md:grid md:grid-cols-[1fr_auto_1fr]">
+                    <div className="flex justify-start">
+                        <Link
+                            href="/"
+                            className="flex items-center gap-2.5 text-xl font-bold text-foreground tracking-tight transition-all duration-300 hover:opacity-80 group"
+                        >
+                            <Image
+                                src="/icon.svg"
+                                alt="BidStrike"
+                                width={32}
+                                height={32}
+                                className="rounded-lg"
+                            />
+                            <span>BidStrike</span>
+                        </Link>
+                    </div>
 
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav className="hidden md:flex items-center justify-center gap-1">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
@@ -52,7 +54,7 @@ export default function Header() {
                         ))}
                     </nav>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-end gap-2 justify-self-end">
                         <NotificationBell />
                         <ThemeToggle />
                         {!isLoading && (
