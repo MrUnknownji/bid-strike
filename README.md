@@ -16,7 +16,7 @@ Visit live preview at https://bid-strike.vercel.app/
 ## 🛠️ Tech Stack
 
 - **Frontend:** Next.js 15, React, Tailwind CSS, Shadcn UI
-- **Backend:** Next.js API Routes, MongoDB (Mongoose)
+- **Backend:** Next.js API Routes, MongoDB (Mongoose), Cloudinary(Images)
 - **Real-Time:** Socket.io WebSocket server
 - **Payments:** Stripe
 - **Email:** Resend
