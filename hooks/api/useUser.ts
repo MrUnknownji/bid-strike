@@ -37,6 +37,7 @@ export function useToggleLike() {
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['likedAuctions'] });
+            queryClient.invalidateQueries({ queryKey: ['userAuctionStatus'] });
         },
     });
 }
@@ -60,6 +61,7 @@ export function useToggleWatchlist() {
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['watchlist'] });
+            queryClient.invalidateQueries({ queryKey: ['userAuctionStatus'] });
         },
     });
 }
@@ -77,5 +79,14 @@ export function useUserWonAuctions() {
         queryKey: ['wonAuctions'],
         queryFn: () => fetchWithAuth('/api/auctions/won'),
         staleTime: 1000 * 60,
+    });
+}
+
+export function useUserAuctionStatus(auctionId: string | undefined, isAuthenticated: boolean) {
+    return useQuery({
+        queryKey: ['userAuctionStatus', auctionId],
+        queryFn: () => fetchWithAuth(`/api/user/status?auctionId=${auctionId}`),
+        enabled: !!auctionId && isAuthenticated,
+        retry: false,
     });
 }

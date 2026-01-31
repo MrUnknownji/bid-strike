@@ -27,14 +27,20 @@ export function useAuction(id: string | undefined) {
     });
 }
 
-export function useAuctions(params: {
+interface UseAuctionsParams {
     page?: number;
     limit?: number;
     category?: string;
+    subcategory?: string;
     status?: string;
     search?: string;
     sort?: string;
-} = {}) {
+    minPrice?: number | string;
+    maxPrice?: number | string;
+    condition?: string;
+}
+
+export function useAuctions(params: UseAuctionsParams = {}) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {

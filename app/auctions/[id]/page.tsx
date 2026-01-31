@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use, useEffect } from 'react';
+import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,8 +21,9 @@ import BidHistory from '@/components/auction/BidHistory';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { Trash2, AlertTriangle, Pencil, Heart, Eye, RefreshCw } from 'lucide-react';
 import { useAuction, useDeleteAuction } from '@/hooks/api/useAuctions';
-import { useToggleLike, useToggleWatchlist } from '@/hooks/api/useUser';
+import { useToggleLike, useToggleWatchlist, useUserAuctionStatus } from '@/hooks/api/useUser';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 
 function PageLoader() {
     return (
@@ -43,48 +44,23 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
     const { id } = use(params);
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { user } = useAuth();
 
     const { data, isLoading, error, refetch } = useAuction(id);
     const auction = data?.auction;
+
+    // Fetch user status (liked, watching)
+    const { data: userStatus } = useUserAuctionStatus(id, !!user);
+    const isLiked = userStatus?.liked || false;
+    const isWatching = userStatus?.watching || false;
 
     const deleteAuction = useDeleteAuction();
     const toggleLike = useToggleLike();
     const toggleWatchlist = useToggleWatchlist();
 
     const [selectedImage, setSelectedImage] = useState(0);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
-    const [isWatching, setIsWatching] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [bidRefreshTrigger, setBidRefreshTrigger] = useState(0);
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('accessToken');
-        setIsLoggedIn(!!token);
-
-        if (storedUser) {
-            try {
-                const user = JSON.parse(storedUser);
-                setCurrentUserId(user.id);
-            } catch {
-                setCurrentUserId(null);
-            }
-        }
-
-        if (token && id) {
-            fetch(`/api/user/status?auctionId=${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setIsLiked(data.liked);
-                    setIsWatching(data.watching);
-                })
-                .catch(() => { });
-        }
-    }, [id]);
 
     const handleDelete = async () => {
         try {
@@ -99,8 +75,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
 
     const handleLike = async () => {
         try {
-            const result = await toggleLike.mutateAsync(id);
-            setIsLiked(result.liked);
+            await toggleLike.mutateAsync(id);
         } catch (error) {
             console.error('Failed to toggle like:', error);
         }
@@ -108,8 +83,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
 
     const handleWatch = async () => {
         try {
-            const result = await toggleWatchlist.mutateAsync(id);
-            setIsWatching(result.watching);
+            await toggleWatchlist.mutateAsync(id);
         } catch (error) {
             console.error('Failed to toggle watchlist:', error);
         }
@@ -135,7 +109,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
     }
 
     const isEnded = new Date(auction.endTime) < new Date() || auction.status === 'ended';
-    const isOwner = currentUserId && auction.seller._id === currentUserId;
+    const isOwner = user && auction.seller._id === user.id;
 
     const canEdit = () => {
         if (!isOwner) return false;
@@ -222,7 +196,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                         </div>
                     </div>
 
-                    {isLoggedIn && !isOwner && (
+                    {user && !isOwner && (
                         <div className="flex gap-2 mb-6">
                             <Button
                                 variant={isLiked ? 'default' : 'outline'}

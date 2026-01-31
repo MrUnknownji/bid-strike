@@ -7,6 +7,21 @@ interface CountdownTimerProps {
   onEnd?: () => void;
 }
 
+const TimeBox = ({ value, label, isUrgent }: { value: number | string; label: string; isUrgent: boolean }) => (
+  <div className={`relative overflow-hidden px-3 py-2 rounded-lg text-center min-w-[52px] transition-all duration-300 ${isUrgent
+      ? 'bg-destructive/10 border border-destructive/30'
+      : 'bg-muted/60 border border-border/50'
+    }`}>
+    <span className={`text-xl font-bold font-mono tabular-nums transition-colors ${isUrgent ? 'text-destructive' : 'text-foreground'
+      }`}>
+      {typeof value === 'number' ? String(value).padStart(2, '0') : value}
+    </span>
+    <span className="text-[10px] block text-muted-foreground uppercase tracking-wider mt-0.5 font-medium">
+      {label}
+    </span>
+  </div>
+);
+
 export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isEnded, setIsEnded] = useState(false);
@@ -52,27 +67,12 @@ export default function CountdownTimer({ endTime, onEnd }: CountdownTimerProps) 
     );
   }
 
-  const TimeBox = ({ value, label }: { value: number | string; label: string }) => (
-    <div className={`relative overflow-hidden px-3 py-2 rounded-lg text-center min-w-[52px] transition-all duration-300 ${isUrgent
-        ? 'bg-destructive/10 border border-destructive/30'
-        : 'bg-muted/60 border border-border/50'
-      }`}>
-      <span className={`text-xl font-bold font-mono tabular-nums transition-colors ${isUrgent ? 'text-destructive' : 'text-foreground'
-        }`}>
-        {typeof value === 'number' ? String(value).padStart(2, '0') : value}
-      </span>
-      <span className="text-[10px] block text-muted-foreground uppercase tracking-wider mt-0.5 font-medium">
-        {label}
-      </span>
-    </div>
-  );
-
   return (
     <div className="flex gap-1.5">
-      {timeLeft.days > 0 && <TimeBox value={timeLeft.days} label="days" />}
-      <TimeBox value={timeLeft.hours} label="hrs" />
-      <TimeBox value={timeLeft.minutes} label="min" />
-      <TimeBox value={timeLeft.seconds} label="sec" />
+      {timeLeft.days > 0 && <TimeBox value={timeLeft.days} label="days" isUrgent={isUrgent} />}
+      <TimeBox value={timeLeft.hours} label="hrs" isUrgent={isUrgent} />
+      <TimeBox value={timeLeft.minutes} label="min" isUrgent={isUrgent} />
+      <TimeBox value={timeLeft.seconds} label="sec" isUrgent={isUrgent} />
     </div>
   );
 }
