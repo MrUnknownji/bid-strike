@@ -17,16 +17,6 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status');
         const limit = parseInt(searchParams.get('limit') || '50');
 
-        const now = new Date();
-        await Auction.updateMany(
-            { seller: payload.userId, status: 'scheduled', startTime: { $lte: now }, endTime: { $gt: now } },
-            { status: 'active' }
-        );
-        await Auction.updateMany(
-            { seller: payload.userId, status: 'active', endTime: { $lte: now } },
-            { status: 'ended' }
-        );
-
         const query: Record<string, unknown> = { seller: payload.userId };
 
         if (status && status !== 'all') {

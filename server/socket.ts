@@ -1,5 +1,7 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import connectDB from '@/lib/db/database';
+import { updateAuctionStatuses } from '@/lib/services/auction-updater';
 
 const httpServer = createServer((req, res) => {
     if (req.url === '/health') {
@@ -49,9 +51,31 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3001;
 const HOST = '0.0.0.0';
 
+async function startBackgroundWorker() {
+    try {
+        await connectDB();
+        console.log('Background worker connected to DB');
+
+        // Run immediately
+        await updateAuctionStatuses();
+
+        // Then every 60 seconds
+        setInterval(async () => {
+            try {
+                await updateAuctionStatuses();
+            } catch (error) {
+                console.error('Background worker iteration failed:', error);
+            }
+        }, 60000);
+    } catch (error) {
+        console.error('Failed to start background worker:', error);
+    }
+}
+
 httpServer.listen(Number(PORT), HOST, () => {
     console.log(`WebSocket server running on ${HOST}:${PORT}`);
     console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+    startBackgroundWorker();
 });
 
 export { io };
