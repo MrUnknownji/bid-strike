@@ -20,16 +20,6 @@ export async function GET(request: NextRequest) {
         const maxPrice = searchParams.get('maxPrice');
         const condition = searchParams.get('condition');
 
-        const now = new Date();
-        await Auction.updateMany(
-            { status: 'scheduled', startTime: { $lte: now }, endTime: { $gt: now } },
-            { status: 'active' }
-        );
-        await Auction.updateMany(
-            { status: 'active', endTime: { $lte: now } },
-            { status: 'ended' }
-        );
-
         const query: Record<string, unknown> = {};
 
         if (status && status !== 'all') {
