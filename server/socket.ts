@@ -1,5 +1,7 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import connectDB from '@/lib/db/database';
+import { updateAuctionStatuses } from '@/lib/services/auction-updater';
 
 const httpServer = createServer((req, res) => {
     if (req.url === '/health') {
@@ -21,6 +23,21 @@ const io = new Server(httpServer, {
         methods: ['GET', 'POST'],
         credentials: true,
     },
+});
+
+// Initialize DB connection and background job
+connectDB().then(() => {
+    console.log('Connected to MongoDB in socket server');
+
+    // Run update immediately on start
+    updateAuctionStatuses();
+
+    // Schedule periodic updates (every 60 seconds)
+    setInterval(() => {
+        updateAuctionStatuses();
+    }, 60 * 1000);
+}).catch(err => {
+    console.error('Failed to connect to MongoDB in socket server:', err);
 });
 
 io.on('connection', (socket) => {
