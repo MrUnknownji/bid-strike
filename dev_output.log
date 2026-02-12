@@ -1,0 +1,80 @@
+$ bun run dev & bun run dev:socket
+$ next dev
+$ bun run server/socket.ts
+WebSocket server running on 0.0.0.0:3001
+Allowed origins: http://localhost:3000
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+✓ Ready in 2.8s
+Failed to connect to MongoDB in socket server: 1164 |  */
+1165 |
+1166 | function _handleConnectionErrors(err) {
+1167 |   if (err?.name === 'MongoServerSelectionError') {
+1168 |     const originalError = err;
+1169 |     err = new ServerSelectionError();
+                             ^
+MongooseServerSelectionError: Failed to connect
+ errorLabelSet: Set {},
+     reason: TopologyDescription {
+  type: "Unknown",
+  servers: Map(1) {
+    "localhost:27017": [Object ...],
+  },
+  stale: false,
+  compatible: true,
+  heartbeatFrequencyMS: 10000,
+  localThresholdMS: 15,
+  setName: null,
+  maxElectionId: null,
+  maxSetVersion: null,
+  commonWireVersion: 0,
+  logicalSessionTimeoutMinutes: null,
+  updateFromSrvPollingEvent: [Function: updateFromSrvPollingEvent],
+  update: [Function: update],
+  error: [Getter],
+  hasKnownServers: [Getter],
+  hasDataBearingServers: [Getter],
+  hasServer: [Function: hasServer],
+  toJSON: [Function: toJSON],
+},
+       code: undefined,
+      cause: TopologyDescription {
+  type: "Unknown",
+  servers: Map(1) {
+    "localhost:27017": [Object ...],
+  },
+  stale: false,
+  compatible: true,
+  heartbeatFrequencyMS: 10000,
+  localThresholdMS: 15,
+  setName: null,
+  maxElectionId: null,
+  maxSetVersion: null,
+  commonWireVersion: 0,
+  logicalSessionTimeoutMinutes: null,
+  updateFromSrvPollingEvent: [Function: updateFromSrvPollingEvent],
+  update: [Function: update],
+  error: [Getter],
+  hasKnownServers: [Getter],
+  hasDataBearingServers: [Getter],
+  hasServer: [Function: hasServer],
+  toJSON: [Function: toJSON],
+},
+
+      at new MongooseError (1:23)
+      at new MongooseServerSelectionError (1:23)
+      at _handleConnectionErrors (/app/node_modules/mongoose/lib/connection.js:1169:11)
+      at openUri (/app/node_modules/mongoose/lib/connection.js:1100:11)
+
+○ Compiling / ...
+ GET / 200 in 7.3s (compile: 6.4s, render: 860ms)
+ GET /verify-carousel 200 in 1105ms (compile: 909ms, render: 195ms)
+✓ Compiled in 119ms

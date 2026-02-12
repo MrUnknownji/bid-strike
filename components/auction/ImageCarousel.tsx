@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -114,11 +115,14 @@ export default function ImageCarousel({
                         <ImageOff className="w-8 h-8 text-muted-foreground" />
                     </div>
                 ) : (
-                    <img
+                    <Image
                         src={validImages[0]}
                         alt="Product"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                         onError={() => setFailedImages(new Set([0]))}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority
                     />
                 )}
             </div>
@@ -136,20 +140,23 @@ export default function ImageCarousel({
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
                 {validImages.map((image, index) => (
-                    <div key={index} className="w-full h-full flex-shrink-0">
+                    <div key={index} className="w-full h-full flex-shrink-0 relative">
                         {failedImages.has(index) ? (
                             <div className="w-full h-full flex items-center justify-center bg-muted">
                                 <ImageOff className="w-8 h-8 text-muted-foreground" />
                             </div>
                         ) : (
-                            <img
+                            <Image
                                 src={image}
                                 alt={`Product ${index + 1}`}
+                                fill
                                 className={cn(
-                                    'w-full h-full object-cover transition-transform duration-300',
+                                    'object-cover transition-transform duration-300',
                                     isHovering && 'scale-105'
                                 )}
                                 onError={() => setFailedImages((prev) => new Set([...prev, index]))}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority={index === 0}
                             />
                         )}
                     </div>
