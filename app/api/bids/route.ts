@@ -41,14 +41,12 @@ async function processAutoBids(auctionId: string, currentBidderId: string, newPr
         $inc: { totalBids: 1 },
     });
 
-    try {
-        await notifyOutbid(
-            currentBidderId,
-            auctionId,
-            'Auction',
-            autoBidAmount
-        );
-    } catch { }
+    notifyOutbid(
+        currentBidderId,
+        auctionId,
+        'Auction',
+        autoBidAmount
+    ).catch(() => {});
 
     return newBid;
 }
@@ -106,13 +104,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const previousWinner = await Bid.findOne({ auction: auctionId, isWinning: true });
-        const previousBidderId = previousWinner?.bidder?.toString();
-
-        await Bid.updateMany(
+        // Optimization: Find and update the previous winner in one atomic operation
+        // This reduces DB round trips and improves performance
+        const previousWinner = await Bid.findOneAndUpdate(
             { auction: auctionId, isWinning: true },
-            { isWinning: false }
+            { isWinning: false },
+            { sort: { amount: -1 } }
         );
+        const previousBidderId = previousWinner?.bidder?.toString();
 
         const bid = await Bid.create({
             auction: auctionId,
@@ -130,9 +129,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (previousBidderId && previousBidderId !== payload.userId) {
-            try {
-                await notifyOutbid(previousBidderId, auctionId, auction.title, amount);
-            } catch { }
+            notifyOutbid(previousBidderId, auctionId, auction.title, amount).catch(() => {});
         }
 
         const autoBidResult = await processAutoBids(
