@@ -36,9 +36,9 @@
   --sidebar-accent-foreground: oklch(0.3786 0.0288 64.6646);
   --sidebar-border: oklch(0.8650 0.0394 83.8170);
   --sidebar-ring: oklch(0.6290 0.0951 64.0516);
-  --font-sans: Libre Baskerville, serif;
-  --font-serif: Lora, serif;
-  --font-mono: IBM Plex Mono, monospace;
+  --font-sans: var(--font-libre-baskerville), serif;
+  --font-serif: var(--font-lora), serif;
+  --font-mono: var(--font-ibm-plex-mono), monospace;
   --radius: 0.625rem;
   --shadow-2xs: 2px 3px 5px 0px hsl(26.2500 15.6863% 20% / 0.06);
   --shadow-xs: 2px 3px 5px 0px hsl(26.2500 15.6863% 20% / 0.06);
