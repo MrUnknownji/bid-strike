@@ -70,6 +70,9 @@ const UserSchema = new Schema<IUser>({
     lastLogin: Date,
 }, { timestamps: true });
 
+UserSchema.index({ username: 1 }, { name: 'username_collation', collation: { locale: 'en', strength: 1 } });
+UserSchema.index({ email: 1 }, { name: 'email_collation', collation: { locale: 'en', strength: 1 } });
+
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;
