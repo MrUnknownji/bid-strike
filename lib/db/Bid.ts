@@ -25,6 +25,7 @@ const BidSchema = new Schema<IBid>({
 
 BidSchema.index({ auction: 1, amount: -1 });
 BidSchema.index({ bidder: 1 });
+BidSchema.index({ auction: 1, maxAutoBidAmount: -1 });
 
 const Bid: Model<IBid> = mongoose.models.Bid || mongoose.model<IBid>('Bid', BidSchema);
 
