@@ -17,21 +17,38 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '20');
         const search = searchParams.get('search') || '';
 
-        const query = search
-            ? {
-                $or: [
-                    { username: { $regex: search, $options: 'i' } },
-                    { email: { $regex: search, $options: 'i' } },
-                ],
-            }
-            : {};
+        let query: any = {};
+        const collation = { locale: 'en', strength: 1 };
 
-        const total = await User.countDocuments(query);
-        const users = await User.find(query)
+        if (search) {
+            // Optimize search using range query on collation index instead of slow regex
+            const lastChar = search.slice(-1);
+            const nextCode = lastChar.charCodeAt(0) + 1;
+            const nextChar = String.fromCharCode(nextCode);
+            const searchEnd = search.slice(0, -1) + nextChar;
+
+            query = {
+                $or: [
+                    { username: { $gte: search, $lt: searchEnd } },
+                    { email: { $gte: search, $lt: searchEnd } },
+                ],
+            };
+        }
+
+        let countQuery = User.countDocuments(query);
+        let findQuery = User.find(query)
             .select('username email role isActive isBanned createdAt rating totalAuctionsListed totalAuctionsWon')
             .sort('-createdAt')
             .skip((page - 1) * limit)
             .limit(limit);
+
+        if (search) {
+            countQuery = countQuery.collation(collation);
+            findQuery = findQuery.collation(collation);
+        }
+
+        const total = await countQuery;
+        const users = await findQuery;
 
         return NextResponse.json({
             users,
