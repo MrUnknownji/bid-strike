@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
         const query: Record<string, unknown> = {};
         if (status) query.status = status;
-        if (search) query.title = { $regex: search, $options: 'i' };
+        if (search) query.$text = { $search: search };
 
         const total = await Auction.countDocuments(query);
         const auctions = await Auction.find(query)

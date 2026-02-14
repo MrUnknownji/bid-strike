@@ -81,6 +81,7 @@ const AuctionSchema = new Schema<IAuction>({
 AuctionSchema.index({ status: 1, endTime: 1 });
 AuctionSchema.index({ seller: 1 });
 AuctionSchema.index({ category: 1 });
+AuctionSchema.index({ title: 'text' });
 
 const Auction: Model<IAuction> = mongoose.models.Auction || mongoose.model<IAuction>('Auction', AuctionSchema);
 
