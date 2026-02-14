@@ -54,18 +54,14 @@ export async function GET(request: NextRequest) {
                 ],
             }).select('_id');
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const orConditions: any[] = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { tags: { $regex: search, $options: 'i' } },
-            ];
-
             if (categoryMatches.length > 0) {
-                orConditions.push({ category: { $in: categoryMatches.map(c => c._id) } });
+                query.$or = [
+                    { $text: { $search: search } },
+                    { category: { $in: categoryMatches.map(c => c._id) } },
+                ];
+            } else {
+                query.$text = { $search: search };
             }
-
-            query.$or = orConditions;
         }
 
         const total = await Auction.countDocuments(query);
